@@ -1,30 +1,12 @@
-// Core modules
-const path = require('path');
-
 // Dependency modules
 const express = require('express');
 
 // Custom modules
-const rootDir = require('../util/path');
+const productsController = require('../controllers/products');
 
-const items = [];
 const router = express.Router();
 
-router.get('/add-product', (req, res, next) => {
-  res.render('add-product', {
-    pageTitle: 'Add Product',
-    path: '/admin/add-product',
-    activeAddProduct: true,
-    productCSS: true,
-    formsCSS: true
-  });
-});
+router.get('/add-product', productsController.getAddProduct);
+router.post('/add-product', productsController.postAddProduct);
 
-router.post('/add-product', (req, res, next) => {
-  items.push({title: req.body.title});
-  res.redirect('/');
-});
-
-
-exports.routes = router;
-exports.items = items;
+module.exports = router;
