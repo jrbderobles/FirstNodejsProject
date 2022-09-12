@@ -7,16 +7,18 @@ const express = require('express');
 // Custom modules
 const rootDir = require('../util/path');
 
+const items = [];
 const router = express.Router();
 
-router.get('/add-item', (req, res, next) => {
-  res.sendFile(path.join(rootDir, 'views', 'add-item.html'));
+router.get('/add-product', (req, res, next) => {
+  res.render('add-product', {pageTitle: 'Add Product', path: '/admin/add-product'});
 });
 
-router.post('/add-item', (req, res, next) => {
-  console.log(req.body);
+router.post('/add-product', (req, res, next) => {
+  items.push({title: req.body.title});
   res.redirect('/');
 });
 
 
-module.exports = router;
+exports.routes = router;
+exports.items = items;
