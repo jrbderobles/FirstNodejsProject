@@ -9,9 +9,11 @@ const bodyParser = require('body-parser');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const rootDir = require('./util/path');
+const db = require('./util/database');
 const errorsController = require('./controllers/errors');
 
 const app = express();
+
 app.set('view engine', 'ejs');
 app.set('views', 'views'); // explicit setting of where views are located
 
