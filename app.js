@@ -10,16 +10,11 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
 const rootDir = require('./util/path');
-const sequelize = require('./util/database');
-
-const Product = require('./models/product');
-const User = require('./models/user');
-const Cart = require('./models/cart');
-const CartItem = require('./models/cart-item');
-const Order = require('./models/order');
-const OrderItem = require('./models/order-item');
+const mongoConnect = require('./util/database').mongoConnect;
 
 const errorsController = require('./controllers/errors');
+
+const User = require('./models/user');
 
 const app = express();
 
@@ -30,9 +25,9 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(rootDir, 'public')));
 
 app.use((req, res, next) => {
-  User.findByPk(1)
+  User.findById('63273b7a6f201307c257edd9')
     .then(user => {
-      req.user = user;
+      req.user = new User(user.name, user.email, user.cart, user._id);
       next();
     })
     .catch(err => console.log(err));
@@ -43,45 +38,6 @@ app.use(shopRoutes);
 
 app.use(errorsController.get404);
 
-User.hasOne(Cart);
-User.hasMany(Product);
-User.hasMany(Order);
-
-Product.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
-Product.belongsToMany(Cart, {through: CartItem});
-Product.belongsToMany(Order, {through: OrderItem});
-
-Cart.belongsTo(User);
-Cart.belongsToMany(Product, {through: CartItem});
-
-Order.belongsTo(User);
-Order.belongsToMany(Product, {through: OrderItem});
-
-sequelize
-  // .sync({force: true})
-  .sync()
-  .then(result => {
-    return User.findByPk(1);
-  })
-  .then(user => {
-    if (!user) {
-       return User.create({
-        name: 'John de Robles',
-        email: 'jrbderobles@gmail.com'
-      });
-    }
-
-    return user;
-  })
-  .then(user => {
-    return user.getCart()
-      .then(cart => {
-        if (!cart) {
-          return user.createCart();
-        }
-        
-        return cart;
-      });
-  })
-  .then(cart => app.listen(3000))
-  .catch(err => console.log(err));
+mongoConnect(() => {
+  app.listen(3000);
+});
