@@ -4,13 +4,13 @@ const path = require('path');
 // Dependency modules
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 // Custom modules
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
 const rootDir = require('./util/path');
-const mongoConnect = require('./util/database').mongoConnect;
 
 const errorsController = require('./controllers/errors');
 
@@ -25,9 +25,9 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(rootDir, 'public')));
 
 app.use((req, res, next) => {
-  User.findById('63273b7a6f201307c257edd9')
+  User.findById('6328781b89ac81ac87a1610b')
     .then(user => {
-      req.user = new User(user.name, user.email, user.cart, user._id);
+      req.user = user;
       next();
     })
     .catch(err => console.log(err));
@@ -38,6 +38,24 @@ app.use(shopRoutes);
 
 app.use(errorsController.get404);
 
-mongoConnect(() => {
-  app.listen(3000);
-});
+mongoose.connect('mongodb+srv://username5263:ThisIsMyDbPass0228@cluster0.2bjd6of.mongodb.net/shop?retryWrites=true&w=majority')
+  .then(() => {
+    User.findOne().then(user => {
+      if (!user) {
+        const user = new User({
+          name: 'John de Robles',
+          email: 'jrbderobles@gmail.com',
+          cart: {
+            items: []
+          }
+        });
+    
+        user.save();
+      }
+      return user;
+    });
+  })
+  .then(() => {
+      app.listen(3000);
+    })
+  .catch(err => console.log(err));
