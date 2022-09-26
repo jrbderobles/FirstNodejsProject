@@ -1,6 +1,7 @@
 // Core modules
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 // Dependency modules
 const express = require('express');
@@ -31,6 +32,8 @@ const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {
   flags: 'a'
 });
+// const privateKey = fs.readFileSync('server.key');
+// const certificate = fs.readFileSync('server.cert');
 
 const app = express();
 
@@ -130,5 +133,11 @@ app.use((error, req, res, next) => {
 
 mongoose
   .connect(MONGODB_URI)
-  .then(() => app.listen(process.env.PORT || 3000))
+  .then(() => {
+    // https.createServer({
+    //   key: privateKey,
+    //   cert: certificate
+    // }, app).listen(process.env.PORT || 3000);
+    app.listen(process.env.PORT || 3000);
+  })
   .catch(err => console.log(err));
