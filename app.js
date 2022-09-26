@@ -1,4 +1,5 @@
 // Core modules
+const fs = require('fs');
 const path = require('path');
 
 // Dependency modules
@@ -10,6 +11,10 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const flash = require('connect-flash');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
+require('dotenv').config({ debug: true });
 
 // Custom modules
 const adminRoutes = require('./routes/admin');
@@ -22,7 +27,10 @@ const errorsController = require('./controllers/errors');
 
 const User = require('./models/user');
 
-const MONGODB_URI = 'mongodb+srv://username5263:ThisIsMyDbPass0228@cluster0.2bjd6of.mongodb.net/shop?retryWrites=true&w=majority';
+const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER}.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}?retryWrites=true&w=majority`;
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {
+  flags: 'a'
+});
 
 const app = express();
 
@@ -52,6 +60,12 @@ const fileFilter = (req, file, cb) => {
 
 app.set('view engine', 'ejs');
 app.set('views', 'views'); // explicit setting of where views are located
+
+app.use(helmet());
+app.use(compression());
+app.use(morgan('combined', {
+  stream: accessLogStream
+}));
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(multer({
@@ -116,5 +130,5 @@ app.use((error, req, res, next) => {
 
 mongoose
   .connect(MONGODB_URI)
-  .then(() => app.listen(3000))
+  .then(() => app.listen(process.env.PORT || 3000))
   .catch(err => console.log(err));

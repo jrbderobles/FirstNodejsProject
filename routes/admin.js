@@ -1,6 +1,6 @@
 // Dependency modules
 const express = require('express');
-const { check, body } = require('express-validator/check');
+const { check, body } = require('express-validator');
 
 // Custom modules
 const adminController = require('../controllers/admin');
